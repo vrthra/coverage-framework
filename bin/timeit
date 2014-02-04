@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 #timeout=$((3600*12))s;;
 timeout=$1
