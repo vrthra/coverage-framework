@@ -1,0 +1,9 @@
+#!/bin/bash
+case $1 in
+  -h) echo " time";;
+esac
+for i in projects/*/.time;
+do
+  x=${i//projects\/}
+  echo ${x//\/.time},$(cat $i)
+done

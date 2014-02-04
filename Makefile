@@ -17,7 +17,7 @@ tag=x #$(shell gdate +%F,%R)
 maxtimeout=3600
 coveragedirs=$(add-prefix,build/,$(coverages))
 
-mydirs=projects build .tmp .home logs build/$(coverage)
+mydirs=projects build .tmp .data .home logs build/$(coverage)
 
 all:
 	@echo $(projects)
@@ -55,7 +55,7 @@ clobber:
 	rm -rf logs/*.log
 	echo rm -rf .tmp .home $(coveragedirs)
 
-dirs: .tmp .home projects build/$(coverage)
+dirs: .tmp .data .home projects build/$(coverage)
 
 #-----------------------------------------------------------------
 
@@ -66,6 +66,7 @@ endef
 
 define testgen =
 $1-all : $(addprefix $(1)-,$(projects))
+	$$(root)/bin/show.$$(coverage) -h > .data/$$(coverage).$(1).csv
 	@echo $$(@) done.
 
 $1-% : projects/%/.$(1).done
@@ -73,21 +74,17 @@ $1-% : projects/%/.$(1).done
 
 %/.$1.done : | %/.checkedout dirs
 	$$(root)/bin/cleantmp
-	@echo "`date +'%r'` to `date --date '1 hour' +'%r'`"
+	@echo `date +'%r'`
 	@echo timeout=$$(maxtimeout) \
 				tag=$$(tag) \
 				root=$$(root) \
 				coverage=$$(coverage) \
 				suite=$(1) \
 				| sed -e "s/ \+/\n/g" > $$(*)/.env
-	- /usr/bin/timeout -s 9 $$$$((3600*12))s stdbuf -oL $$(MAKE) -C $$(*) -w `cat $$(*)/.env` runtests
+	- $$(root)/bin/timeit $$(maxtimeout)s $$(*) $$(MAKE) -C $$(*) -w `cat $$(*)/.env` runtests
 	@echo ended at `date +'%r'`
 	@echo =============================================
 endef
-
-#		$$(root)/bin/cleanout $$(*F)-$(1) | \
-#			tee logs/$(1).$$(shell basename $$(*)).$$(tag).log; echo $$$$SECONDS \
-# 2>&1 | \
 
 $(foreach var,$(suite),$(eval $(call testgen,$(var))))
 $(foreach var,$(projects),$(eval $(call namegen,$(var))))

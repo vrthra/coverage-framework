@@ -1,0 +1,10 @@
+#!/bin/bash -x
+
+#timeout=$((3600*12))s;;
+timeout=$1
+shift;
+projectdir=$1
+shift;
+SECONDS=0
+/usr/bin/timeout -s 9 ${timeout} "$@"
+echo $SECONDS > ${projectdir}/.time
