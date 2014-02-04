@@ -1,0 +1,25 @@
+#!/bin/bash
+case x"$1" in
+    x-h) echo " cobertura.line.num,cobertura.line.total,cobertura.branch.num,cobertura.branch.total,cobertura.complexity"; exit 0 ;;
+    x) echo "Need project"; exit 1;;
+esac
+project=$1
+
+detected=$(elinks --no-references --no-numbering --dump target/site/cobertura/frame-summary.html 2>/dev/null | sed -e 's#N/A N/A#-1% -1/1#g' | \
+perl -ne 'print $1.",".$2.",".$3.",".$4.",".$5."\n" if /All Packages\s+[0-9.-]+\s+[0-9.-]+%\s([0-9.-]+)\/([0-9.-]+)\s+[0-9.-]+%\s+([0-9.-]+)\/([0-9.-]+)\s+[0-9.-]+;([0-9.-]+)\s*'/
+)
+
+echo $project,$detected
+
+exit;
+cat <<EOF
+
+      Coverage Report - All Packages
+
+    
+
+   Package      # Classes [1]Line       [2]Branch    [3]Complexity
+                          Coverage      Coverage
+   All Packages 1            98% 62/63     96% 25/26 1.9411764705882353;1.941
+   [4]bank      1            98% 62/63     96% 25/26 1.9411764705882353;1.941
+EOF
