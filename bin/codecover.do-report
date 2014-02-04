@@ -1,0 +1,17 @@
+#!/bin/bash -x
+# perhaps generate .ppid here.
+# to be run form within the project.
+
+project=$1
+tsttype=$2
+tag=$3
+
+$root/bin/mvn codecover:instrument;
+rm *.clf;
+$root/bin/mvn test
+java -jar $root/lib/codecover-batch.jar analyze --container target/codecover/container.xml \
+  --coverage-log *.clf --name default --comment default;
+$root/bin/mvn codecover:report -Dtemplate=$root/meta/HTML_Report_hierarchic.xml
+rm -rf target/site1
+mv target/site target/site1
+$root/bin/mvn codecover:report -Dtemplate=$root/meta/codecover_html_template.xml

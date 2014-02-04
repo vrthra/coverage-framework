@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<report version="1.0" xmlns="http://www.codecover.org/xml/report-template">
+    <plugin>org.codecover.report.html</plugin>
+    <generator>org.codecover.report.html.HierarchicalHTMLReportGenerator</generator>
+    <name xml:lang="en">HTML Report (hierarchic)</name>
+    <description xml:lang="en">Generates a hierarchical report in HTML-format.</description>
+    <template
+        version="1"
+        xmlns="http://www.codecover.org/xml/report-template/html-hierarchic">
+        <language>en</language>
+        <text-file filename="style.css" content-type="text/css"><![CDATA[]]></text-file>
+      <title-page><![CDATA[
+#foreach ($m in $coverageMetrics)
+   #if ($m.Name == "Statement Coverage")
+      $sorter.setKey($m, 1)
+   #end
+   #if ($m.Name == "Branch Coverage")
+       $sorter.setKey($m, 2)
+   #end
+   #if ($m.Name == "Loop Coverage")
+       $sorter.setKey($m, 3)
+   #end
+   #if ($m.Name == "Strict Condition Coverage")
+       $sorter.setKey($m, 4)
+   #end
+#end
+$sorter.sort($coverageMetrics)
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+        "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<body>
+    <div class="overview">
+    <table class="overview sortable">
+    <thead class="overview">
+        <tr class="overview">
+            <th class="overview firstcolumn"></th>
+#foreach( $coverageMetric in $coverageMetrics )
+            <th class="overview" colspan="3">$html.escape($coverageMetric.Name)</th>
+#end
+        </tr>
+    </thead>
+    <tbody class="overview">
+#foreach( $hierarchyLevel in $currentLevel.children )
+    <tr class="overview">
+#if($hierarchyLevel.Type.InternalName == "method")    
+    #set( $currentNameOfHierarchyLevel = $html.escape($hierarchyLevel.HeaderString))
+#else
+    #set( $currentNameOfHierarchyLevel = $html.escape($hierarchyLevel.Name))
+#end
+            <td class="overview firstcolumn">
+                <a>
+                    $currentNameOfHierarchyLevel
+                </a>
+            </td>
+    #foreach( $coverageMetric in $coverageMetrics )
+
+                #if( $coverageMetric.getCoverage($testcases, $hierarchyLevel).TotalItems > 0 )
+                #set( $percent = 100 * $coverageMetric.getCoverage($testcases, $hierarchyLevel).CoveredItems/$coverageMetric.getCoverage($testcases, $hierarchyLevel).TotalItems )
+                <td class="overview">
+                        $coverageMetric.getCoverage($testcases, $hierarchyLevel).CoveredItems/$coverageMetric.getCoverage($testcases, $hierarchyLevel).TotalItems
+                </td>
+                <td class="overview">
+                        $percent%
+                </td>
+        #else
+            <td class="overview">
+                        0/0
+                </td>
+                <td class="overview">
+                        ---
+                </td>
+        #end 
+    #end
+        </tr>
+#end
+    </tbody>
+    </table>
+    </div>
+</body>
+</html>
+        ]]></title-page>
+        <selection-page><![CDATA[]]></selection-page>
+        <code-page><![CDATA[]]></code-page>
+        <text-file filename="sorttable.js" content-type="text/javascript"><![CDATA[]]></text-file>
+    </template>
+</report>

@@ -1,0 +1,50 @@
+#!/usr/bin/env ruby
+
+case ARGV[0]
+when /-h/
+  puts " codecover.line.num,codecover.line.total,codecover.branch.num,codecover.branch.total,codecover.loop.num,codecover.loop.total,codecover.condition.num,codecover.condition.total"
+  exit 0
+end
+
+project=ARGV[0]
+
+h = {}
+
+%x[/usr/bin/elinks --dump-width 120 --dump target/site/codecover/report.html 2>/dev/null | tr -dc '[:print:]\n'].split(/\n/).each do |l|
+  l.strip!
+  case l
+  when /[^ ]+\s+([0-9.-]+)\/([0-9.-]+)\s+[0-9.-]+%?\s+([0-9.-]+)\/([0-9.-]+)\s+[0-9.-]+%?\s+([0-9.-]+)\/([0-9.-]+)\s+[0-9.-]+%?\s+([0-9.-]+)\/([0-9.-]+)\s+[0-9.-]+%?\s*/
+    #puts [$1,$2,$3,$4,$5,$6,$7,$8].inspect
+    h[:ln] ||= 0
+    h[:lt] ||= 0
+
+    h[:bn] ||= 0
+    h[:bt] ||= 0
+
+    h[:pn] ||= 0
+    h[:pt] ||= 0
+
+    h[:cn] ||= 0
+    h[:ct] ||= 0
+
+    h[:ln] += $1.to_i
+    h[:lt] += $2.to_i
+
+    h[:bn] += $3.to_i
+    h[:bt] += $4.to_i
+
+    h[:pn] += $5.to_i
+    h[:pt] += $6.to_i
+
+    h[:cn] += $7.to_i
+    h[:ct] += $8.to_i
+  end
+end
+
+puts "#{project},#{[h[:ln],h[:lt],h[:bn],h[:bt],h[:pn],h[:pt],h[:cn],h[:ct]].inspect.gsub(/[\[\] ]/,'')}"
+
+
+s=<<EOF
+       Statement Coverage  Branch Coverage Loop Coverage Strict Condition Coverage
+   net 389/591 65% 242/410 59%  67/162 41% 98/279  35%
+EOF
