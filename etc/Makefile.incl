@@ -1,4 +1,4 @@
-# Gets included from etc/testgen/Makefile.*
+# Gets included from etc/Makefile.testgen
 
 runtests: ._.$(suite).$(coverage).rpt
 

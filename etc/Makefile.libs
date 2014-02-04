@@ -51,4 +51,4 @@ define mvn-test-compile =
 	@touch $$(@);
 endef
 
-include $(root)/etc/testgen/Makefile.$(suite)
+include $(root)/etc/Makefile.testgen
