@@ -6,20 +6,26 @@ cp = ENV['CLASSPATH'] || ''
 ['javancss', 'ccl', 'jhbasic'].each do |c|
    cp += ":#{cur}/../lib/jncss/#{c}.jar"
 end
-methods = {}
-methods.default = 0
+
+fn = {}
+fn.default = 0
+
+classes = {}
+classes.default = 0
 %x[java -classpath #{cp} javancss.Main -recursive -object #{ARGV[1]}].each_line do |l|
-  l.chomp!
+  l.chomp!.strip!
   case l
   when /^ *[0-9]+/
     ll = l.split(/\s+/)
-    name = ll[6]
-    loc = ll[2].to_i
-    #name = name.gsub!(/\(.*\)/,'')
-    methods[name] += loc
+    name = ll[5]
+    loc = ll[1].to_i
+    f = ll[2].to_i
+    classes[name] += loc
+    fn[name] = f
   end
 end
-methods.keys.sort.each do |m|
-  puts "#{m},#{methods[m]}"
+puts " loc,functions"
+classes.keys.sort.each do |m|
+  puts "#{m},#{classes[m]},#{fn[m]}"
 end
 

@@ -2,11 +2,10 @@
 include $(root)/etc/Makefile.env
 
 clean:
-	rm -rf src
+	rm -rf src target .pom.xml
 	$(root)/bin/get-notests $(project)
 	mkdir -p src/test
 	cat $(root)/etc/Makefile.tmpl > Makefile
-	cp $(root)/etc/filter.rb filter.rb
 	$(root)/bin/jncss-getfn.rb src/main > .functions
 	$(root)/bin/jncss-getclass.rb src/main > .classes
 	touch .checkedout
