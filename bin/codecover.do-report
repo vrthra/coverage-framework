@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 # perhaps generate .ppid here.
 # to be run form within the project.
 

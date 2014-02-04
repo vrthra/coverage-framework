@@ -1,4 +1,4 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 
 cur = File.dirname(__FILE__)
 cp = ENV['CLASSPATH'] || ''
