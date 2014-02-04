@@ -31,24 +31,24 @@ runtests: $(suite)
 checkout: $(addprefix checkout-,$(projects))
 	@echo $@ done.
 
-checkout-%: | projects/%/.checkedout
+checkout-%: | projects/%/._.checkedout
 	@echo $@ done.
 
 $(mydirs): ;  mkdir -p $@
 
-projects/%/.checkedout: | $(mydirs)
+projects/%/._.checkedout: | $(mydirs)
 	$(root)/bin/new $*
-	touch projects/$*/.checkedout
+	@touch projects/$*/._.checkedout
 
 clean: $(addprefix clean-,$(projects)) logs
 	truncate -s 0 logs/log.txt
 
 clean-%:
-	cd projects/$* && $(MAKE) root=$(root) clean
+	cd projects/$* && $(MAKE) root=$(root) clean || true
 
 clobber-%: | projects/%/.git
 	env root=$(root) $(root)/bin/clean $*
-	touch projects/$*/.checkedout
+	@touch projects/$*/._.checkedout
 
 clobber:
 	echo > logs/log.txt
@@ -73,7 +73,7 @@ $1-all : $(addprefix $(1)-,$(projects))
 $1-% : projects/%/.$(1).done
 	@echo $$(@) done.
 
-%/.$1.done : | %/.checkedout dirs
+%/.$1.done : | %/._.checkedout dirs
 	$$(root)/bin/cleantmp
 	@echo `date +'%r'`
 	@echo timeout=$$(maxtimeout) \

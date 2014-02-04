@@ -3,7 +3,9 @@
 # to be run form within the project.
 
 project=$1
-tsttype=$2
+suite=$2
 tag=$3
-
+coverage=cobertura
+SECONDS=0
 $root/bin/mvn cobertura:cobertura -Dcobertura.report.format=html
+echo $SECONDS > .time.$suite.$coverage

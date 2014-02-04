@@ -3,12 +3,14 @@
 # to be run form within the project.
 
 project=$1
-tsttype=$2
+suite=$2
+coverage=codecover
 tag=$3
-
 $root/bin/mvn codecover:instrument;
 rm *.clf;
+SECONDS=0
 $root/bin/mvn test
+echo $SECONDS > .time.$suite.$coverage
 java -jar $root/lib/codecover-batch.jar analyze --container target/codecover/container.xml \
   --coverage-log *.clf --name default --comment default;
 $root/bin/mvn codecover:report -Dtemplate=$root/meta/HTML_Report_hierarchic.xml

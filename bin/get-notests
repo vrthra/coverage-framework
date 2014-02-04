@@ -4,4 +4,4 @@ case x$1 in
 esac
 
 project=$1
-tar -xpf $root/.backup/notests/$project.tar
+(cd $root && tar -xpf $root/.backup/notests/$project.tar )

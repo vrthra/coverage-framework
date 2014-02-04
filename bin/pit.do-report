@@ -3,7 +3,10 @@
 # to be run form within the project.
 
 project=$1
-tsttype=$2
+suite=$2
 tag=$3
-cp $root/meta/filter.rb .
+coverage=pit
+rm -rf pit.reports
+SECONDS=0
 $root/bin/mvn org.pitest:pitest-maven:mutationCoverage
+echo $SECONDS > .time.$suite.$coverage

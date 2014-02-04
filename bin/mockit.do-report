@@ -3,6 +3,9 @@
 # to be run form within the project.
 
 project=$1
-tsttype=$2
+suite=$2
 tag=$3
+coverage=mockit
+SECONDS=0
 $root/bin/mvn test
+echo $SECONDS > .time.$suite.$coverage
