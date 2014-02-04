@@ -1,29 +1,34 @@
 #$(if $(filter $(MAKE_VERSION), 3.82),, $(error Use fake current $(MAKE_VERSION)))
 
 .PHONY: checkout all clobber clean $(checkout.all)
-.SECONDARY: $(addprefix projects/,$(names))
+.SECONDARY: $(addprefix projects/,$(projects))
 
 root:=$(CURDIR)
 
-myprojects=$(root)/etc/projects.txt
+myprojects=$(root)/.projects
 
-types=$(shell $(root)/bin/cat $(root)/etc/types.txt)
-names=$(shell $(root)/bin/cat $(shell $(root)/bin/greadlink -f $(myprojects)))
+suite=$(shell $(root)/bin/cat $(root)/etc/suite.txt)
+projects=$(shell $(root)/bin/projects)
+coverages=$(shell $(root)/bin/cat $(root)/etc/coverage.txt)
+coverage=emma #default.
+
+
 tag=x #$(shell gdate +%F,%R)
 maxtimeout=3600
+coveragedirs=$(add-prefix,build/,$(coverages))
 
-mydirs=projects build .tmp .home logs logs/files build/emma build/mockit build/pit build/cobertura build/codecover db/files db/cloc
+mydirs=projects build .tmp .home logs build/$(coverage)
 
 all:
-	echo $(names)
-	@echo use 'make <type>-<project>'
-	@echo projects = $(names)
-	@echo types = $(types)
+	@echo $(projects)
+	@echo use 'make <suite>-<project>'
+	@echo projects = $(projects)
+	@echo suite = $(suite)
 
-runtests: $(types)
+runtests: $(suite)
 	@echo $@ done.
 
-checkout: $(addprefix checkout-,$(names))
+checkout: $(addprefix checkout-,$(projects))
 	@echo $@ done.
 
 checkout-%: | projects/%/.checkedout
@@ -32,15 +37,14 @@ checkout-%: | projects/%/.checkedout
 $(mydirs): ;  mkdir -p $@
 
 projects/%/.checkedout: | $(mydirs)
-	env root=$(root) $(root)/bin/checkout $*
-	env root=$(root) $(root)/bin/initupdate $*
+	$(root)/bin/new $*
 	touch projects/$*/.checkedout
 
-clean: $(addprefix clean-,$(names)) logs
+clean: $(addprefix clean-,$(projects)) logs
 	truncate -s 0 logs/log.txt
 
 clean-%:
-	cd projects/$* && $(MAKE) clean
+	cd projects/$* && $(MAKE) root=$(root) clean
 
 clobber-%: | projects/%/.git
 	env root=$(root) $(root)/bin/clean $*
@@ -49,44 +53,44 @@ clobber-%: | projects/%/.git
 clobber:
 	echo > logs/log.txt
 	rm -rf logs/*.log
-	rm -rf .tmp .home build/emma build/pit build/mockit build/codecover build/cobertura
-	mkdir -p $(mydirs)
+	echo rm -rf .tmp .home $(coveragedirs)
 
-dirs: .tmp .home logs/files projects build/emma build/pit build/mockit build/codecover build/cobertura
+dirs: .tmp .home projects build/$(coverage)
 
 #-----------------------------------------------------------------
 
 define namegen =
-all-$1 : $(addsuffix -$(1),$(types))
+all-$1 : $(addsuffix -$(1),$(suite))
 	@echo $$(@) done.
 endef
 
 define testgen =
-$1-all : $(addprefix $(1)-,$(names))
+$1-all : $(addprefix $(1)-,$(projects))
 	@echo $$(@) done.
 
 $1-% : projects/%/.$(1).done
 	@echo $$(@) done.
 
-%/.$1.done : | %/.git dirs
+%/.$1.done : | %/.checkedout dirs
 	$$(root)/bin/cleantmp
 	@echo "`date +'%r'` to `date --date '1 hour' +'%r'`"
 	@echo timeout=$$(maxtimeout) \
 				tag=$$(tag) \
 				root=$$(root) \
-				score=$$(score) \
-				type=$(1) \
+				coverage=$$(coverage) \
+				suite=$(1) \
 				| sed -e "s/ \+/\n/g" > $$(*)/.env
-	- $$(MAKE) -C $$(*) -w `cat $$(*)/.env` runtests 2>&1 | \
-		sed -e '/^[ ]*$$$$/d' -e "s#^#$$(*F)-$(1): #g" | \
-			tr -dc '[:print:][:space:]' | \
-			tee logs/$(1).$$(shell basename $$(*)).$$(tag).log; echo $$$$SECONDS \
+	- $$(MAKE) -C $$(*) -w `cat $$(*)/.env` runtests
 	@echo ended at `date +'%r'`
 	@echo =============================================
 endef
 
-$(foreach var,$(types),$(eval $(call testgen,$(var))))
-$(foreach var,$(names),$(eval $(call namegen,$(var))))
+#		$$(root)/bin/cleanout $$(*F)-$(1) | \
+#			tee logs/$(1).$$(shell basename $$(*)).$$(tag).log; echo $$$$SECONDS \
+# 2>&1 | \
+
+$(foreach var,$(suite),$(eval $(call testgen,$(var))))
+$(foreach var,$(projects),$(eval $(call namegen,$(var))))
 
 #-----------------------------------------------------------------
 

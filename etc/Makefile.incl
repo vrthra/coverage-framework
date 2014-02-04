@@ -1,0 +1,11 @@
+# Gets included from etc/testgen/Makefile.*
+
+runtests: .$(suite).$(coverage).txt
+
+$(eval $(call mvn-test-compile,$(suite)))
+$(eval $(call do-report,$(suite),$(coverage)))
+
+.$(suite).testrun: .$(suite).test.compiled .$(suite).tests.created | $(root)/build
+	$(MAKE) .tests
+	touch $@
+

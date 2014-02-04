@@ -1,0 +1,49 @@
+# To be included only from project specific makefiles.
+include $(root)/etc/Makefile.env
+
+clean:
+	rm -rf src
+	$(root)/bin/get-notests $(project)
+	mkdir -p src/test
+	cat $(root)/etc/Makefile.tmpl > Makefile
+	cp $(root)/etc/filter.rb filter.rb
+	$(root)/bin/jncss-getfn.rb src/main > .functions
+	$(root)/bin/jncss-getclass.rb src/main > .classes
+	touch .checkedout
+
+ifdef MVN_SKIPTEST
+	MVNARGS=
+else
+	MVNARGS=-Dmaven.test.skip=true
+endif
+
+project.jar:
+	$(root)/bin/updatepom -$(coverage) pom.xml > .pom.xml
+	$(root)/bin/generate-pkg $(MVNARGS) > .mvn.package 2>.mvn.package.err
+	@echo $(@) done.
+
+.test:
+	mkdir -p .test
+
+.tests: target/test-classes
+	find ./target/test-classes -name \*.class | \
+		sed -ne '/^[^$$]*$$/p' | \
+		sed -e 's/^..target.test-classes.//' -e 's/\//./g' -e 's/.class$$//g' > .tests
+
+.classes: target/classes
+	find ./target/classes -name \*.class | \
+		sed -ne '/^[^$$]*$$/p' | \
+		sed -e 's/^..target.classes.//' -e 's/\//./g' -e 's/.class$$//g' > .classes
+
+define do-report =
+.$(1).$(2).txt: .$(1).testrun
+	-env root=$(root) $(root)/bin/$(2).do-report $$(project) $(1) $(tag) > $$(@) 2>$$(@).err;
+endef
+
+define mvn-test-compile =
+.$(1).test.compiled: project.jar
+	$(mvn) test-compile > .test-compile.out 2>.test-compile.err && touch $$(@)
+	env root=$(root) $(root)/bin/genclasspath
+endef
+
+include $(root)/etc/testgen/Makefile.$(suite)

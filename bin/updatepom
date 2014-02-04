@@ -1,0 +1,373 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'nokogiri'
+
+begin
+
+case ARGV[0]
+when /-emma/
+  $test = :emma
+when /-codecover/
+  $test = :codecover
+when /-pit/
+  $test = :pit
+when /-mockit/
+  $test = :mockit
+when /-cobertura/
+  $test = :cobertura
+when /-clover/
+  $test = :clover
+else
+  puts "Error : need -<coverage>"
+  exit(-1)
+end
+
+doc = Nokogiri::XML(File.open(ARGV[1])) do |c|
+  c.default_xml.noblanks
+end
+
+def get_dependencies(doc)
+  deps = []
+  doc.css('//dependencies/dependency').each do |node|
+    grpId = node.at_css("groupId").text
+    artId = node.at_css("artifactId").text
+    verId = node.at_css("version").text
+    deps << [grpId, artId, verId].join(':')
+  end
+  return deps
+end
+
+reqdeps = [
+  ['net.sourceforge.javydreamercsw', 'randoop', '1.3.2', nil, nil],
+  ['xmlutil', 'a', '0.0', '/home/rahul/Research/test.gen/lib/xmlutil.jar', 'system'],
+  ['junit', 'junit', '4.10', nil, 'test'],
+]
+
+doc.css('//dependency').each do |node|
+  case node.content
+  when /junit/i
+    node.remove
+  when /jtestcase/i
+    node.remove
+  when /jcrasher/i
+    node.remove
+  when /xmlutil/i
+    node.remove
+  when /jmockit/i
+    node.remove
+  when /clover/i
+    node.remove
+  end
+end
+
+deps =  doc.at_css('//dependencies')
+if deps.nil?
+  proj = doc.at_css('//project')
+  deps = Nokogiri::XML::Node.new "dependencies", doc
+  proj.add_child(deps)
+end
+
+def def_deps(doc, dd)
+  gt = dd[0]
+  at = dd[1]
+  v = dd[2]
+  p = dd[3]
+  s = dd[4]
+
+  d = Nokogiri::XML::Node.new "dependency", doc
+  gid = Nokogiri::XML::Node.new "groupId", doc
+  gid.content = gt
+  d.add_child(gid)
+
+  artid = Nokogiri::XML::Node.new "artifactId", doc
+  artid.content = at
+  d.add_child(artid)
+
+  ver = Nokogiri::XML::Node.new "version", doc
+  ver.content = v
+  d.add_child(ver)
+
+  if !p.nil?
+    path = Nokogiri::XML::Node.new "systemPath", doc
+    path.content = p
+    d.add_child(path)
+  end
+
+  if !s.nil?
+    scope = Nokogiri::XML::Node.new "scope", doc
+    scope.content = s
+    d.add_child(scope)
+  end
+  return d
+end
+
+reqdeps.each do |dd|
+  deps.add_child(def_deps(doc, dd))
+end
+
+build = doc.at_css('//project/build')
+if build.nil?
+  proj = doc.at_css('//project')
+  build = Nokogiri::XML::Node.new "build", doc
+  proj.add_child(build)
+end
+
+plugins =  doc.at_css('//build/plugins')
+if plugins.nil?
+  plugins = Nokogiri::XML::Node.new "plugins", doc
+  build.add_child(plugins)
+end
+
+rep =  doc.at_css('//reporting')
+if rep.nil?
+  proj = doc.at_css('//project')
+  rep = Nokogiri::XML::Node.new "reporting", doc
+  proj.add_child(rep)
+end
+
+repplugins =  doc.at_css('//reporting/plugins')
+if repplugins.nil?
+  proj = doc.at_css('//project/reporting')
+  repplugins = Nokogiri::XML::Node.new "plugins", doc
+  proj.add_child(repplugins)
+end
+
+doc.css('//build/plugins/plugin').each do |node|
+  case node.content
+  when /org.pitestpitest/
+    node.remove
+  when /org.codehaus.mojo/
+    node.remove
+  when /maven-surefire-plugin/
+    node.remove
+  when /maven-compiler-plugin/
+    node.remove
+  end
+end
+
+def add_plugin(doc, gid_text, artid_text, ver_text, &block)
+  p = Nokogiri::XML::Node.new "plugin", doc
+  gid = Nokogiri::XML::Node.new "groupId", doc
+  gid.content = gid_text
+  p.add_child(gid)
+
+  artid = Nokogiri::XML::Node.new "artifactId", doc
+  artid.content = artid_text
+  p.add_child(artid)
+
+  if ver_text
+    ver = Nokogiri::XML::Node.new "version", doc
+    ver.content = ver_text
+    p.add_child(ver)
+  end
+  yield p
+  return p
+end
+
+if $test == :pit
+  add_plugin(doc, 'org.pitest', 'pitest-maven', '0.34-CURRENT') do |p|
+    conf = Nokogiri::XML::Node.new "configuration", doc
+    rep = Nokogiri::XML::Node.new "reportsDirectory", doc
+    xml = Nokogiri::XML::Node.new "outputFormats", doc
+    val = Nokogiri::XML::Node.new "value", doc
+    val.content = 'HTML' # contains line and mutation.
+    to = Nokogiri::XML::Node.new "timeoutConstant", doc
+    to.content = '100'
+    xml.add_child(val)
+    rep.content = 'pit.reports'
+    conf.add_child(rep)
+    conf.add_child(xml)
+    conf.add_child(to)
+    p.add_child(conf)
+    plugins.add_child(p)
+  end
+end
+
+add_plugin(doc, 'org.apache.maven.plugins', 'maven-compiler-plugin', '2.5.1') do |p|
+  conf = Nokogiri::XML::Node.new "configuration", doc
+  debug = Nokogiri::XML::Node.new "debug", doc
+  debug.content = 'true'
+  debugl = Nokogiri::XML::Node.new "debuglevel", doc
+  debugl.content = 'lines,vars,source'
+  conf.add_child(debug)
+  conf.add_child(debugl)
+  p.add_child(conf)
+  plugins.add_child(p)
+end
+
+
+if $test == :cobertura
+  add_plugin(doc, 'org.codehaus.mojo', 'cobertura-maven-plugin', '2.5.2') do |p|
+    conf = Nokogiri::XML::Node.new "configuration", doc
+    fmts = Nokogiri::XML::Node.new "formats", doc
+    fmt = Nokogiri::XML::Node.new "format", doc
+    fmt.content = 'xml'
+    fmts.add_child(fmt)
+    conf.add_child(fmts)
+    p.add_child(conf)
+    repplugins.add_child(p)
+  end
+end
+
+if $test == :codecover
+  add_plugin(doc, 'org.codecover.mojo', 'codecover-maven-plugin', '1.0') do |p|
+    exes = Nokogiri::XML::Node.new "executions", doc
+    exe = Nokogiri::XML::Node.new "execution", doc
+    id = Nokogiri::XML::Node.new "id", doc
+    id.content = 'codecover-instrument'
+    phase = Nokogiri::XML::Node.new "phase", doc
+    phase.content = 'generate-sources'
+    goals = Nokogiri::XML::Node.new "goals", doc
+    goal = Nokogiri::XML::Node.new "goal", doc
+    goal.content = 'instrument'
+    goals.add_child(goal)
+
+    conf = Nokogiri::XML::Node.new "configuration", doc
+    rootd = Nokogiri::XML::Node.new "rootDirectory", doc
+    rootd.content = 'src/main/java'
+    dest = Nokogiri::XML::Node.new "destination", doc
+    dest.content = 'target/codecover/generated-sources'
+    lang = Nokogiri::XML::Node.new "language", doc
+    lang.content = 'java'
+    charset = Nokogiri::XML::Node.new "charset", doc
+    charset.content = 'UTF-8'
+    conf.add_child(rootd)
+    conf.add_child(dest)
+    conf.add_child(lang)
+    conf.add_child(charset)
+
+    exe.add_child(id)
+    exe.add_child(phase)
+    exe.add_child(goals)
+    exe.add_child(conf)
+    exes.add_child(exe)
+    p.add_child(exes)
+    plugins.add_child(p)
+  end
+end
+
+if $test == :emma
+  add_plugin(doc, 'org.codehaus.mojo', 'emma-maven-plugin', '1.0-alpha-3') do |p|
+    inh = Nokogiri::XML::Node.new "inherited", doc
+    inh.content = 'true'
+    p.add_child(inh)
+
+    exes = Nokogiri::XML::Node.new "executions", doc
+    exe = Nokogiri::XML::Node.new "execution", doc
+    phase = Nokogiri::XML::Node.new "phase", doc
+    phase.content = 'process-classes'
+    exe.add_child(phase)
+
+    goals = Nokogiri::XML::Node.new "goals", doc
+    goal = Nokogiri::XML::Node.new "goal", doc
+    goal.content = 'instrument'
+    goals.add_child(goal)
+
+    exe.add_child(goals)
+    exes.add_child(exe)
+
+    p.add_child(exes)
+    plugins.add_child(p)
+  end
+
+  add_plugin(doc, 'org.apache.maven.plugins', 'maven-surefire-plugin', nil) do |p|
+    inh = Nokogiri::XML::Node.new "inherited", doc
+    inh.content = 'true'
+    p.add_child(inh)
+
+    conf = Nokogiri::XML::Node.new "configuration", doc
+    fm = Nokogiri::XML::Node.new "forkMode", doc
+    fm.content = 'once'
+    conf.add_child(fm)
+
+    sysp = Nokogiri::XML::Node.new "systemPropertyVariables", doc
+    #combine.children=append
+    sysp['combine.children'] = 'append'
+    rt = Nokogiri::XML::Node.new "emma.rt.control", doc
+    rt.content = 'false'
+    sysp.add_child(rt)
+    conf.add_child(sysp)
+
+    rf = Nokogiri::XML::Node.new "reportFormat", doc
+    rf.content = 'xml'
+    conf.add_child(rf)
+
+    cd = Nokogiri::XML::Node.new "classesDirectory", doc
+    cd.content = '${project.build.directory}/generated-classes/emma/classes'
+    conf.add_child(cd)
+
+    p.add_child(conf)
+    plugins.add_child(p)
+  end
+
+  add_plugin(doc, 'org.codehaus.mojo', 'emma-maven-plugin', '1.0-alpha-3') do |p|
+    inh = Nokogiri::XML::Node.new "inherited", doc
+    inh.content = 'true'
+    p.add_child(inh)
+    repplugins.add_child(p)
+  end
+
+  add_plugin(doc, 'org.codehaus.mojo', 'surefire-report-maven-plugin', nil) do |p|
+    inh = Nokogiri::XML::Node.new "inherited", doc
+    inh.content = 'true'
+    p.add_child(inh)
+    repplugins.add_child(p)
+  end
+end
+
+if $test == :mockit
+  mockitdeps = [
+    ['mockit', 'jmockit-coverage', '1.5', '/home/rahul/Research/test.gen/lib/jmockit-coverage.jar', 'system'],
+    ['mockit', 'jmockit', '1.5', '/home/rahul/Research/test.gen/lib/jmockit-1.5.jar', 'system'],
+  ]
+  mockitdeps.each do |dd|
+    deps.add_child(def_deps(doc, dd))
+  end
+
+  add_plugin(doc, 'org.apache.maven.plugins', 'maven-surefire-plugin', nil) do |p|
+    inh = Nokogiri::XML::Node.new "inherited", doc
+    inh.content = 'true'
+    p.add_child(inh)
+
+    conf = Nokogiri::XML::Node.new "configuration", doc
+    fm = Nokogiri::XML::Node.new "forkMode", doc
+    fm.content = 'once'
+    conf.add_child(fm)
+
+    rf = Nokogiri::XML::Node.new "reportFormat", doc
+    rf.content = 'xml'
+    conf.add_child(rf)
+
+    argline = Nokogiri::XML::Node.new "argLine", doc
+    argline.content = '-javaagent:/home/rahul/Research/test.gen/lib/jmockit-1.5.jar'
+    conf.add_child(argline)
+
+    p.add_child(conf)
+    plugins.add_child(p)
+  end
+
+  add_plugin(doc, 'org.codehaus.mojo', 'surefire-report-maven-plugin', nil) do |p|
+    inh = Nokogiri::XML::Node.new "inherited", doc
+    inh.content = 'true'
+    p.add_child(inh)
+    repplugins.add_child(p)
+  end
+
+end
+
+if $test == :clover
+  add_plugin(doc, 'com.atlassian.maven.plugins', 'maven-clover2-plugin', nil) do |p|
+    #conf = Nokogiri::XML::Node.new "configuration", doc
+    #p.add_child(conf)
+    plugins.add_child(p)
+  end
+end
+
+puts doc
+
+rescue Exception => e
+  puts e.message
+  puts e.backtrace
+end
+

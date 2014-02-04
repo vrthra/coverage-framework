@@ -1,0 +1,24 @@
+-include .env
+
+#$(if $(filter $(MAKE_VERSION), 3.82),, $(error Use fake current $(MAKE_VERSION)))
+ifndef root
+	root:=$(shell greadlink -f ../../)
+endif
+ifndef tag
+	tag=$(shell date +%s)
+endif
+ifndef suite
+	suite=original
+endif
+ifndef coverage
+	coverage=null
+endif
+
+
+junitv=4
+
+all:
+	@echo run $(make) runtests coverage=$(coverage) suite=$(suite)
+
+include $(root)/etc/Makefile.libs
+

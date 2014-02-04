@@ -1,0 +1,9 @@
+#!/bin/bash
+bin=$(dirname $0)
+$bin/mvn package "$@"
+jar=$(ls target/*.jar | head -1)
+case x"$jar" in
+  x) echo "No jars found.";;
+  *) cp $jar ./project.jar;;
+esac
+

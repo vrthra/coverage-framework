@@ -1,0 +1,9 @@
+#!/bin/sh
+# Just checks out the project from where ever it is, and overwrites if present.
+case x$1 in
+  x) echo "Input project name" ; exit 1;;
+esac
+repo=$1
+mkdir -p projects
+rm -rf ./projects/$1
+tar -xpf ../db/$1.tar

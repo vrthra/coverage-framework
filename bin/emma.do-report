@@ -1,0 +1,12 @@
+#!/bin/bash
+# perhaps generate .ppid here.
+# to be run form within the project.
+
+project=$1
+tsttype=$2
+tag=$3
+
+$root/bin/mvn test
+em=$(find . -name coverage.em)
+ec=$(find . -name coverage.ec)
+java -cp ${root}/lib/emma.jar emma report -Dreport.units=count -r html -in ${em},${ec} -sp src/main/java

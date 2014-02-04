@@ -1,0 +1,6 @@
+#!/bin/sh
+case "$1" in
+  -h)
+    ./bin/lastcov.emma -h;;
+esac
+ls projects/*/coverage/index.html | awk -F\/ '{print $2}' | while read a; do (cd projects/$a && ../../bin/lastcov.emma $a); done

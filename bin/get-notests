@@ -1,0 +1,7 @@
+#!/bin/bash
+case x$1 in
+  x) echo "Need project"; exit 1;;
+esac
+
+project=$1
+tar -xpf $root/.backup/notests/$project.tar

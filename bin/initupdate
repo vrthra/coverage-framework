@@ -1,0 +1,10 @@
+#!/bin/sh
+case x$1 in
+  x) echo "Input project name"; exit 1;;
+esac
+repo=$1
+cp etc/Makefile.tmpl projects/$1/Makefile
+mkdir -p .backup/notests .backup/tests
+tar -cf $root/.backup/tests/$1.tar projects/$1/src/test;
+rm -rf projects/$1/src/test; mkdir -p projects/$1/src/test;
+tar -cf .backup/notests/$1.tar projects/$1

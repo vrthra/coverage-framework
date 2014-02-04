@@ -1,0 +1,25 @@
+#!/usr/bin/env ruby
+# It cats the file at ARG1 ignoring all the lines starting with '#'
+# If it finds a line with @, it prints only from that line.
+# if it finds a line with !, it breaks, and prints until then.
+
+lines = File.readlines(ARGV[0])
+toprint = []
+lines.each do |l|
+  l.chomp!
+  case l
+  when /^\#@/
+    toprint = []
+  when /^(.*)\#/
+    toprint << $1.strip
+  when /^@$/
+    toprint = []
+  when /^!$/
+    break
+  else
+    toprint << l.strip
+  end
+end
+toprint.each do |p|
+  puts p
+end

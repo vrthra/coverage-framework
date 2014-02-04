@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+# vim: autoindent tabstop=2 shiftwidth=2 expandtab softtabstop=2 filetype=ruby
+
+bin=File.expand_path(File.dirname(__FILE__))
+root=File.expand_path(File.dirname(File.dirname(__FILE__)))
+puts %x[#{bin}/cat #{root}/.projects]

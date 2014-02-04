@@ -1,0 +1,40 @@
+#!/bin/bash
+case "$1" in
+    -h) echo " emma.class.num,emma.class.total,emma.method.num,emma.method.total,emma.block.num,emma.block.total,emma.line.num,emma.line.total"; exit 0 ;;
+esac
+
+project=$1
+
+detected=$(elinks  --dump --dump-width 120 --no-numbering --no-references --dump coverage/index.html 2>/dev/null |tr -cd '[:print:]\n' | perl -ne '\
+print $1.",".$2.",".$3.",".$4.",".$5.",".$6.",".$7.",".$8."\n" if /all classes +[^%]+% *\(([0-9.]+)\/([0-9.]+)\) +[^%]+% *\(([0-9.]+)\/([0-9.]+)\) +[^%]+% *\(([0-9.]+)\/([0-9.]+)\) [^%]+% *\(([0-9.]+)\/([0-9.]+)\)/
+')
+
+echo $project,$detected
+exit;
+
+cat <<EOF
+         EMMA Coverage Report (generated Sun Jul 28 23:09:48 PDT 2013)
+   [all classes]
+
+OVERALL COVERAGE SUMMARY
+
+       name        class, %      method, %       block, %         line, %
+   all classes   30%  (3/10)   30%  (8/27)   48%  (238/499)   33%  (32.9/99)
+
+  OVERALL STATS SUMMARY
+
+   total packages:         2
+   total executable files: 8
+   total classes:          10
+   total methods:          27
+   total executable lines: 99
+
+  COVERAGE BREAKDOWN BY PACKAGE
+
+           name          class, %    method, %     block, %       line, %
+   com.develogical.web  0%   (0/4)  0%   (0/10) 0%   (0/140)   0%   (0/36)
+   com.develogical      50%  (3/6)  47%  (8/17) 66%  (238/359) 52%  (32.9/63)
+
+   [all classes]
+   EMMA 1 (C) Vladimir Roubtsov
+EOF

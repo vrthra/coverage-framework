@@ -1,0 +1,4 @@
+#!/bin/bash
+echo "Generating .classpath.mvn (dummy for now.)"
+#$root/bin/mvn -o randoop:generate-all-tests
+#cat .classpath.mvn

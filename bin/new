@@ -1,0 +1,8 @@
+#!/bin/bash
+case x$1 in
+  x) echo "need project"; exit 1;;
+esac
+root=$(dirname $(dirname $0))
+
+env root=$root $root/bin/checkout $1
+env root=$root $root/bin/initupdate $1

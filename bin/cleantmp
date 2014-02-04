@@ -1,0 +1,18 @@
+tmpwatch -l -U gdm \
+  -X "/tmp/tmux*" \
+  -X "/tmp/orbit-*" \
+  -X "/tmp/keyring-*" \
+  -X "/tmp/.esd-*" \
+  -X "/tmp/.mendeley-*" \
+  -X "/tmp/.ksocket-*" \
+  -X "/tmp/ssh_*" \
+  -X "/tmp/file*" \
+  -X "/tmp/hsperfdata*" \
+  -X "/tmp/ns.*" \
+  -X "/tmp/plugtmp.*" \
+  -X "/tmp/pulse-.*" \
+  -X "/tmp/*service_ipc" \
+  0 /tmp 2>/dev/null
+
+rm -f projects/* 2>/dev/null || true
+
