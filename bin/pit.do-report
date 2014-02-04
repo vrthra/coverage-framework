@@ -1,0 +1,9 @@
+#!/bin/bash
+# perhaps generate .ppid here.
+# to be run form within the project.
+
+project=$1
+tsttype=$2
+tag=$3
+cp $root/meta/filter.rb .
+$root/bin/mvn org.pitest:pitest-maven:mutationCoverage

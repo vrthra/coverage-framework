@@ -80,7 +80,7 @@ $1-% : projects/%/.$(1).done
 				coverage=$$(coverage) \
 				suite=$(1) \
 				| sed -e "s/ \+/\n/g" > $$(*)/.env
-	- $$(MAKE) -C $$(*) -w `cat $$(*)/.env` runtests
+	- /usr/bin/timeout -s 9 $$$$((3600*12))s stdbuf -oL $$(MAKE) -C $$(*) -w `cat $$(*)/.env` runtests
 	@echo ended at `date +'%r'`
 	@echo =============================================
 endef

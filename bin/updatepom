@@ -166,7 +166,7 @@ def add_plugin(doc, gid_text, artid_text, ver_text, &block)
 end
 
 if $test == :pit
-  add_plugin(doc, 'org.pitest', 'pitest-maven', '0.34-CURRENT') do |p|
+  add_plugin(doc, 'org.pitest', 'pitest-maven', '0.31') do |p|
     conf = Nokogiri::XML::Node.new "configuration", doc
     rep = Nokogiri::XML::Node.new "reportsDirectory", doc
     xml = Nokogiri::XML::Node.new "outputFormats", doc

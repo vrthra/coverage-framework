@@ -1,0 +1,37 @@
+#!/usr/bin/ruby
+
+require 'rubygems'
+require 'nokogiri'
+
+case ARGV[0]
+when /-h/
+    puts " pit.line.num,pit.line.total,pit.mutation.num,pit.mutation.total";
+    exit 0
+end
+cur = ARGV[0]
+html = File.open(Dir.glob('pit.reports/*/index.html').first).read
+parsed_data = Nokogiri::HTML.parse html
+
+data = {}
+myd = []
+parsed_data.xpath("//table").each do |t|
+  t.xpath("//div[@class='coverage_ledgend']").each do |x|
+    myd << x.text
+  end
+end
+case myd[0]
+when /(.*)\/(.*)/
+  data[:linenum] = $1.to_i
+  data[:linetot] = $2.to_i
+else
+  puts "ERROR: line: #{myd[0]}"
+end
+case myd[1]
+when /(.*)\/(.*)/
+  data[:mutnum] = $1.to_i
+  data[:muttot] = $2.to_i
+else
+  puts "ERROR: mut: #{myd[0]}"
+end
+
+puts "#{cur},#{data[:linenum]},#{data[:linetot]},#{data[:mutnum]},#{data[:muttot]}"
