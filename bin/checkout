@@ -6,4 +6,5 @@ esac
 repo=$1
 mkdir -p projects
 rm -rf ./projects/$1
-tar -xpf ../db/$1.tar
+(cd projects; git clone ssh://munin.eecs.oregonstate.edu/scratch/db/github/$1; mkdir -p $1/src/main $1/src/test )
+

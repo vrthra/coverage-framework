@@ -1,2 +1,2 @@
 #!/bin/bash
-env MAVEN_OPTS="-Xms2048m -Xmx2048m" /usr/bin/mvn -o -f .pom.xml $*
+env MAVEN_OPTS="-Xms2048m -Xmx2048m" mvn -o -f .pom.xml $*
