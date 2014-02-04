@@ -67,6 +67,7 @@ endef
 define testgen =
 $1-all : $(addprefix $(1)-,$(projects))
 	$$(root)/bin/show.$$(coverage) -h > .data/$$(coverage).$(1).csv
+	$$(root)/bin/time.show -h > .data/time.$$(coverage).$(1).csv
 	@echo $$(@) done.
 
 $1-% : projects/%/.$(1).done
