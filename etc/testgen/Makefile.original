@@ -1,6 +1,5 @@
 suite=original
 include $(root)/etc/Makefile.incl
 
-.$(suite).tests.created: project.jar .classes
+.$(suite).tests.created: .pom.xml .classes .$(suite).tests
 	env root=$(root) suite=$(suite) $(root)/bin/get-tests $(project)
-	$(mvnclean) && $(mvn) test-compile >.test-compile.1.out 2>.test-compile.1.err

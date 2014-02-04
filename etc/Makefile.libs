@@ -17,20 +17,27 @@ else
 	MVNARGS=-Dmaven.test.skip=true
 endif
 
-project.jar:
+.pom.xml:
 	$(root)/bin/updatepom -$(coverage) pom.xml > .pom.xml
-	$(root)/bin/generate-pkg $(MVNARGS) > .mvn.package 2>.mvn.package.err
-	@echo $(@) done.
+
+#project.jar:
+#	$(root)/bin/generate-pkg $(MVNARGS) > .mvn.package 2>.mvn.package.err
+#	@echo $(@) done.
 
 .test:
 	mkdir -p .test
 
-.tests: target/test-classes
+.$(suite).tests:
+	env root=$(root) suite=$(suite) $(root)/bin/get-tests $(project)
+	touch .$(suite).tests
+
+
+.tests: .$(suite).test.compiled
 	find ./target/test-classes -name \*.class | \
 		sed -ne '/^[^$$]*$$/p' | \
 		sed -e 's/^..target.test-classes.//' -e 's/\//./g' -e 's/.class$$//g' > .tests
 
-.classes: target/classes
+.classes: .$(suite).test.compiled
 	find ./target/classes -name \*.class | \
 		sed -ne '/^[^$$]*$$/p' | \
 		sed -e 's/^..target.classes.//' -e 's/\//./g' -e 's/.class$$//g' > .classes
@@ -41,7 +48,7 @@ define do-report =
 endef
 
 define mvn-test-compile =
-.$(1).test.compiled: project.jar
+.$(1).test.compiled: .$(1).tests .pom.xml
 	$(mvn) test-compile > .test-compile.out 2>.test-compile.err && touch $$(@)
 	env root=$(root) $(root)/bin/genclasspath
 endef
