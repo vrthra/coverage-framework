@@ -136,3 +136,13 @@ make tag=myprojects coverage=<technique> suite=original
 make tag=myprojects coverage=<technique> suite=<suite>
 ```
 
+## Parallel building
+
+The suite is written in such a way that there is no interaction between different
+projects so multiple projects can proceed in parallel. However, many coverage tools
+assume exclusive use of project directory. Hence running different suites at the same
+time on same projects, or running different coverage techniques on the same projects
+at the same time is not advisable, especially for those that insert probes into classes.
+
+For the same reason is also advised to 'make clean' before switching between coverage
+techniques, or test suites. But this is not necessary for switching between projects.
