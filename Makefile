@@ -35,7 +35,7 @@ checkout-%: | projects/%/._.checkedout
 $(mydirs): ;  mkdir -p $@
 
 projects/%/._.checkedout: | $(mydirs)
-	$(root)/bin/new $* >> logs/log.txt 2>&1
+	$(root)/bin/new $* >> logs/checkout.log 2>&1
 	@touch $@
 
 clean: $(addprefix clean-,$(projects)) logs
@@ -49,9 +49,12 @@ clobber-%: | projects/%/.git
 	@touch projects/$*/._.checkedout
 
 clobber:
-	echo > logs/log.txt
-	rm -rf logs/*.log
-	echo rm -rf .tmp .home $(coveragedirs)
+	@echo "# use '| bash' to actually do it."
+	@echo truncate -s 0 logs/log.txt
+	@echo rm -rf logs/*.log
+	@echo rm -rf .data
+	@echo rm -rf .backup
+	@echo rm -rf projects/*
 
 dirs: .tmp .data .home projects build/$(coverage)
 
