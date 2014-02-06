@@ -28,26 +28,27 @@ endif
 
 
 ._.$(suite).testclasses: ._.$(suite).test.compiled
-	find ./target/test-classes -name \*.class | \
+	@find ./target/test-classes -name \*.class | \
 		sed -ne '/^[^$$]*$$/p' | \
 		sed -e 's/^..target.test-classes.//' -e 's/\//./g' -e 's/.class$$//g' > $(@)
 
 ._.classes: ._.$(suite).test.compiled
-	find ./target/classes -name \*.class | \
+	@find ./target/classes -name \*.class | \
 		sed -ne '/^[^$$]*$$/p' | \
 		sed -e 's/^..target.classes.//' -e 's/\//./g' -e 's/.class$$//g' > $(@)
 
 define do-report =
 ._.$(1).$(2).rpt: ._.$(1).testrun
-	@$$(root)/bin/link .log$$(@) ../../logs/$$(project)-$$(@).log;
-	-env root=$(root) $(root)/bin/$(2).do-report $$(project) $(1) $(tag) >.log$$(@) 2>&1;
+	@$$(root)/bin/link $$(@).log ../../logs/$$(project)-$$(@).log;
+	-env root=$(root) $(root)/bin/$(2).run-analysis $$(project) $(1) $(tag) > $$(@).log 2>&1;
+	-$(root)/bin/$(2).lastcov $$(project) > $$(@);
 	@touch $$(@);
 endef
 
 define mvn-test-compile =
 ._.$(1).test.compiled: ._.$(1).tests .pom.$$(coverage).xml
-	@$$(root)/bin/link .log$$(@) ../../logs/$$(project)-$$(@).log;
-	$(mvn) test-compile >.log$$(@) 2>&1;
+	@$$(root)/bin/link $$(@).log ../../logs/$$(project)-$$(@).log;
+	$(mvn) test-compile >$$(@).log 2>&1;
 	@touch $$(@);
 endef
 

@@ -1,6 +1,0 @@
-#!/bin/bash
-case "$1" in
-  -h) ./bin/lastcov.pit -h;;
-esac
-ls projects/*/pit.reports/*/index.html | awk -F\/ '{print $2}' | while read a; do (cd projects/$a && env curdir=$a ../../bin/lastcov.pit $a ); done;
-

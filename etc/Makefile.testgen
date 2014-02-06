@@ -2,5 +2,4 @@ suite=original
 include $(root)/etc/Makefile.incl
 
 ._.$(suite).tests.created: .pom.$(coverage).xml ._.classes ._.$(suite).tests
-	env root=$(root) suite=$(suite) $(root)/bin/get-tests $(project)
 	@touch $(@)

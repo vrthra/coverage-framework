@@ -1,6 +1,0 @@
-#!/bin/sh
-case "$1" in
-  -h)
-    ./bin/lastcov.mockit -h;;
-esac
-ls projects/*/coverage-report/index.html | awk -F\/ '{print $2}' | while read a; do (cd projects/$a && ../../bin/lastcov.mockit $a ); done

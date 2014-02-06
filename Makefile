@@ -5,15 +5,13 @@
 
 root:=$(CURDIR)
 
-myprojects=$(root)/.projects
-
+tag=x #$(shell gdate +%F,%R)
 suite=$(shell $(root)/bin/cat $(root)/etc/suite.txt)
-projects=$(shell $(root)/bin/projects)
+projects=$(shell $(root)/bin/projects $(tag))
 coverages=$(shell $(root)/bin/cat $(root)/etc/coverage.txt)
 coverage=emma #default.
 
 
-tag=x #$(shell gdate +%F,%R)
 maxtimeout=3600
 coveragedirs=$(add-prefix,build/,$(coverages))
 
@@ -37,8 +35,8 @@ checkout-%: | projects/%/._.checkedout
 $(mydirs): ;  mkdir -p $@
 
 projects/%/._.checkedout: | $(mydirs)
-	$(root)/bin/new $*
-	@touch projects/$*/._.checkedout
+	$(root)/bin/new $* >> logs/log.txt 2>&1
+	@touch $@
 
 clean: $(addprefix clean-,$(projects)) logs
 	truncate -s 0 logs/log.txt
@@ -66,8 +64,6 @@ endef
 
 define testgen =
 $1-all : $(addprefix $(1)-,$(projects))
-	$$(root)/bin/show.$$(coverage) -h > .data/$$(coverage).$(1).csv
-	$$(root)/bin/time.show -h > .data/time.$$(coverage).$(1).csv
 	@echo $$(@) done.
 
 $1-% : projects/%/.$(1).done

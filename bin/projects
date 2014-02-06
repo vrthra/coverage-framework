@@ -1,6 +1,15 @@
 #!/usr/bin/env ruby
 # vim: autoindent tabstop=2 shiftwidth=2 expandtab softtabstop=2 filetype=ruby
+tag=ARGV[0]
+if File.exists?("#{tag}.txt")
+  projects = "#{tag}.txt"
+  bin=File.expand_path(File.dirname(__FILE__))
+  root=File.expand_path(File.dirname(File.dirname(__FILE__)))
+  puts %x[#{bin}/cat #{root}/#{projects}]
+else
+  Dir.glob('projects/*').sort.each do |d|
+    d.sub!(/^projects\//,'')
+    puts d
+  end
+end
 
-bin=File.expand_path(File.dirname(__FILE__))
-root=File.expand_path(File.dirname(File.dirname(__FILE__)))
-puts %x[#{bin}/cat #{root}/.projects]

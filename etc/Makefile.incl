@@ -6,6 +6,6 @@ $(eval $(call mvn-test-compile,$(suite)))
 $(eval $(call do-report,$(suite),$(coverage)))
 
 ._.$(suite).testrun: ._.$(suite).test.compiled ._.$(suite).tests.created | $(root)/build
-	$(MAKE) ._.$(suite).testclasses
+	@#$(MAKE) ._.$(suite).testclasses
 	@touch $@
 

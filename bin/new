@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 case x$1 in
   x) echo "need project"; exit 1;;
 esac

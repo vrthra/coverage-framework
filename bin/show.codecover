@@ -1,6 +1,0 @@
-#!/bin/bash
-case "$1" in
-  -h)
-    ./bin/lastcov.codecover -h;;
-esac
-ls projects/*/target/site/codecover/report.html | awk -F\/ '{print $2}' | while read a; do (cd projects/$a && ../../bin/lastcov.codecover $a ); done

@@ -1,0 +1,6 @@
+#!/bin/sh
+case x$1 in
+  x) echo "Need coverage"; exit -1;;
+esac
+./bin/$1.lastcov -h;
+ls projects/*/.*.$1.rpt | xargs cat
