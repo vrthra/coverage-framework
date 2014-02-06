@@ -104,3 +104,35 @@ fake original-all coverage=emma tag=myprojects
 
 Note that tag is the filename (without the .txt) that you previously
 used for projects.
+
+
+
+## Adding a new project other than what is listed
+
+* Ensure that it is reachable by bin/checkout
+* Ensure that its dependencies are met by running mvn package and mvn test
+  because we run maven offline
+* Make sure that it is a green suite (or else the pit wont run)
+
+## Adding a new coverage technique.
+
+* Add the coverage to etc/coverage.txt
+* Add the processing logic to bin/<technique>.do-report
+* Add the report parsing to bin/<technique>.lastcov
+
+```
+make tag=myprojects coverage=<technique> suite=original
+```
+
+## Adding new test suites
+
+* Generate your test suites and store the test suites in .backup/tests/<suite>/
+* Be careful to store a copy of this some where else also. The clobber target wipes
+  this directory
+* Add the suite name to etc/suite.txt
+* Run it with
+
+```
+make tag=myprojects coverage=<technique> suite=<suite>
+```
+
