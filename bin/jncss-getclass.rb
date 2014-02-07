@@ -12,7 +12,7 @@ fn.default = 0
 
 classes = {}
 classes.default = 0
-%x[java -classpath #{cp} javancss.Main -recursive -object #{ARGV[1]}].each_line do |l|
+%x[java -classpath #{cp} javancss.Main -recursive -object #{ARGV[0]}].each_line do |l|
   l.chomp!.strip!
   case l
   when /^ *[0-9]+/

@@ -10,7 +10,7 @@ complex = {}
 complex.default = 0
 methods = {}
 methods.default = 0
-%x[java -classpath #{cp} javancss.Main -recursive -function #{ARGV[1]}].each_line do |l|
+%x[java -classpath #{cp} javancss.Main -recursive -function #{ARGV[0]}].each_line do |l|
   l.chomp!.strip!
   case l
   when /^ *[0-9]+/
