@@ -36,6 +36,8 @@ $(mydirs): ;  @mkdir -p $@
 
 projects/%/._.checkedout: | $(mydirs)
 	$(root)/bin/new $* >> logs/checkout.log 2>&1
+	$(root)/bin/jncss-getfn.rb projects/$*/src/main > projects/$*/.info.functions
+	$(root)/bin/jncss-getclass.rb projects/$*/src/main > projects/$*/.info.classes
 	@touch $@
 
 clean: $(addprefix clean-,$(projects)) logs
@@ -52,7 +54,6 @@ clobber:
 	@echo "# use '| bash' to actually do it."
 	@echo truncate -s 0 logs/log.txt
 	@echo rm -rf logs/*.log
-	@echo rm -rf .data
 	@echo rm -rf .backup
 	@echo rm -rf projects/*
 
