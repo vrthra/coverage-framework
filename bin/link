@@ -4,3 +4,4 @@ linkname=$2
 touch $target
 rm -f $linkname
 ln -fv $target $linkname
+ln -fv $target ../../logs/log.txt
