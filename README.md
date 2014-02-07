@@ -9,6 +9,7 @@
   GNU Make >= 4
   Maven >= 3.0
   JDK >= 7.0
+  Ruby >= 1.9.3
 ```
 
 ### Optional

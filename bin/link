@@ -1,6 +1,6 @@
 #!/bin/bash
-from=$1
-to=$2
-touch $1
-rm -f $2
-ln -s $1 $2
+target=$1
+linkname=$2
+touch $target
+rm -f $linkname
+ln -fv $target $linkname

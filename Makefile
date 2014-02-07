@@ -32,7 +32,7 @@ checkout: $(addprefix checkout-,$(projects))
 checkout-%: | projects/%/._.checkedout
 	@echo $@ done.
 
-$(mydirs): ;  mkdir -p $@
+$(mydirs): ;  @mkdir -p $@
 
 projects/%/._.checkedout: | $(mydirs)
 	$(root)/bin/new $* >> logs/checkout.log 2>&1
@@ -67,14 +67,20 @@ endef
 
 define testgen =
 $1-all : $(addprefix $(1)-,$(projects))
+	@echo timeout=$$(maxtimeout) \
+				tag=$$(tag) \
+				root=$$(root) \
+				coverage=$$(coverage) \
+				suite=$(1) \
+				| sed -e "s/ \+/\n/g" > .env
 	@echo $$(@) done.
 
 $1-% : projects/%/.$(1).done
 	@echo $$(@) done.
 
 %/.$1.done : | %/._.checkedout dirs
-	$$(root)/bin/cleantmp
 	@echo `date +'%r'`
+	$$(root)/bin/cleantmp
 	@echo timeout=$$(maxtimeout) \
 				tag=$$(tag) \
 				root=$$(root) \

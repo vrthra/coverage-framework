@@ -34,4 +34,4 @@ else
   puts "ERROR: mut: #{myd[0]}"
 end
 
-puts "#{cur},#{data[:linenum]},#{data[:linetot]},#{data[:mutnum]},#{data[:muttot]}"
+puts "#{cur},#{data[:linenum]},#{data[:linetot]},#{data[:mutnum]},#{data[:muttot]}" if data.length > 0

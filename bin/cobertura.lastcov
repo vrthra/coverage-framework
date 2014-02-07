@@ -1,25 +1,46 @@
-#!/bin/bash
-case x"$1" in
-    x-h) echo " cobertura.line.num,cobertura.line.total,cobertura.branch.num,cobertura.branch.total,cobertura.complexity"; exit 0 ;;
-    x) echo "Need project"; exit 1;;
-esac
-project=$1
+#!/usr/bin/env ruby
 
-detected=$(elinks --no-references --no-numbering --dump target/site/cobertura/frame-summary.html 2>/dev/null | sed -e 's#N/A N/A#-1% -1/1#g' | \
-perl -ne 'print $1.",".$2.",".$3.",".$4.",".$5."\n" if /All Packages\s+[0-9.-]+\s+[0-9.-]+%\s([0-9.-]+)\/([0-9.-]+)\s+[0-9.-]+%\s+([0-9.-]+)\/([0-9.-]+)\s+[0-9.-]+;([0-9.-]+)\s*'/
-)
+require 'rubygems'
+require 'nokogiri'
 
-echo $project,$detected
+case ARGV[0]
+when /-h/
+  puts " cobertura.line.num,cobertura.line.total,cobertura.branch.num,cobertura.branch.total,cobertura.complexity"
+  exit 0
+end
+cur = ARGV[0]
+exit(0) if !File.exists?('target/site/cobertura/frame-summary.html')
+html = File.open('target/site/cobertura/frame-summary.html').read
+parsed_data = Nokogiri::HTML.parse html
 
-exit;
-cat <<EOF
+names = ['pkg', 'class', 'line', 'branch', 'complexity']
 
-      Coverage Report - All Packages
+data = {}
+mydata = {}
+num = 0
+parsed_data.xpath("//body/table[1]/tbody/tr[1]/td").each do |x|
+  text = x.text.force_encoding("ISO-8859-1").encode("utf-8", replace: ' ').strip.gsub(/\u00a0/, ' ')
+  mydata[names[num]] = text
+  num += 1
+end
 
-    
+mydata.keys.each do |m|
+  next if m =~ /pkg/
+  case mydata[m]
+  when /^([0-9.]+)%[ \t]*([.0-9]+)\/([.0-9]+)$/
+    data[m + '.num'] = $2
+    data[m + '.tot'] = $3
+  when /^([0-9.]+);([.0-9]+)$/
+    data[m] = $2
+  when /^([0-9.]+)$/
+    data[m] = $1
+  when /^N\/A/
+    data[m + '.num'] = -1
+    data[m + '.tot'] = -1
+  else
+    throw "Error #{m}:#{mydata[m]}"
+  end
+end
 
-   Package      # Classes [1]Line       [2]Branch    [3]Complexity
-                          Coverage      Coverage
-   All Packages 1            98% 62/63     96% 25/26 1.9411764705882353;1.941
-   [4]bank      1            98% 62/63     96% 25/26 1.9411764705882353;1.941
-EOF
+puts "#{cur},#{data['line.num']},#{data['line.tot']},#{data['branch.num']},#{data['branch.tot']},#{data['complexity']}" if data.length > 0
+

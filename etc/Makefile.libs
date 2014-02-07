@@ -40,7 +40,7 @@ endif
 define do-report =
 ._.$(1).$(2).rpt: ._.$(1).testrun
 	@$$(root)/bin/link $$(@).log ../../logs/$$(project)-$$(@).log;
-	-env root=$(root) $(root)/bin/$(2).run-analysis $$(project) $(1) $(tag) > $$(@).log 2>&1;
+	-env root=$(root) $(root)/bin/$(2).run-analysis $$(project) $(1) $(tag) >> $$(@).log 2>&1;
 	-$(root)/bin/$(2).lastcov $$(project) > $$(@);
 	@touch $$(@);
 endef
@@ -48,7 +48,7 @@ endef
 define mvn-test-compile =
 ._.$(1).test.compiled: ._.$(1).tests .pom.$$(coverage).xml
 	@$$(root)/bin/link $$(@).log ../../logs/$$(project)-$$(@).log;
-	$(mvn) test-compile >$$(@).log 2>&1;
+	$(mvn) test-compile >>$$(@).log 2>&1;
 	@touch $$(@);
 endef
 

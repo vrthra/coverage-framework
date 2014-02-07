@@ -30,5 +30,5 @@ parsed_data.xpath("//tr[@class='total']").each do |x|
     end
   end
 end
-puts "#{cur},#{data[:linenum]},#{data[:linetot]},#{data[:pathnum]},#{data[:pathtot]},#{data[:fieldnum]},#{data[:fieldtot]}"
+puts "#{cur},#{data[:linenum]},#{data[:linetot]},#{data[:pathnum]},#{data[:pathtot]},#{data[:fieldnum]},#{data[:fieldtot]}" if data.length > 0
 

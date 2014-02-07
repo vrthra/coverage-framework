@@ -1,40 +1,42 @@
-#!/bin/bash
-case "$1" in
-    -h) echo " emma.class.num,emma.class.total,emma.method.num,emma.method.total,emma.block.num,emma.block.total,emma.line.num,emma.line.total"; exit 0 ;;
-esac
+#!/usr/bin/env ruby
 
-project=$1
+require 'rubygems'
+require 'nokogiri'
 
-detected=$(elinks  --dump --dump-width 120 --no-numbering --no-references --dump coverage/index.html 2>/dev/null |tr -cd '[:print:]\n' | perl -ne '\
-print $1.",".$2.",".$3.",".$4.",".$5.",".$6.",".$7.",".$8."\n" if /all classes +[^%]+% *\(([0-9.]+)\/([0-9.]+)\) +[^%]+% *\(([0-9.]+)\/([0-9.]+)\) +[^%]+% *\(([0-9.]+)\/([0-9.]+)\) [^%]+% *\(([0-9.]+)\/([0-9.]+)\)/
-')
+case ARGV[0]
+when /-h/
+    puts " emma.class.num,emma.class.total,emma.method.num,emma.method.total,emma.block.num,emma.block.total,emma.line.num,emma.line.total"
+    exit 0
+end
+cur = ARGV[0]
+exit(0) if !File.exists?('coverage/index.html')
+html = File.open('coverage/index.html').read
+parsed_data = Nokogiri::HTML.parse html
+#data=%x[elinks  --dump --dump-width 120 --no-numbering --no-references --dump coverage/index.html 2>/dev/null |tr -cd '[:print:]\n']
+#p data
 
-echo $project,$detected
-exit;
+names = ['name', 'class', 'method', 'block', 'line']
 
-cat <<EOF
-         EMMA Coverage Report (generated Sun Jul 28 23:09:48 PDT 2013)
-   [all classes]
+data = {}
+mydata = {}
+num = 0
+parsed_data.xpath("//table[2]/tr[2]/td").each do |x|
+  text = x.text.force_encoding("ISO-8859-1").encode("utf-8", replace: nil)
+  mydata[names[num]] = text.strip.gsub(/\u00a0/, ' ')
+  num += 1
+end
 
-OVERALL COVERAGE SUMMARY
+mydata.keys.each do |m|
+  next if m =~ /name/
+  case mydata[m]
+  when /^([0-9.]+)%[ \t]*\(([.0-9]+)\/([.0-9]+)\)$/
+    data[m + '.num'] = $2
+    data[m + '.tot'] = $3
+  else
+    data[m + '.num'] = 0
+    data[m + '.tot'] = 0
+  end
+end
 
-       name        class, %      method, %       block, %         line, %
-   all classes   30%  (3/10)   30%  (8/27)   48%  (238/499)   33%  (32.9/99)
+puts "#{cur},#{data['class.num']},#{data['class.tot']},#{data['method.num']},#{data['method.tot']},#{data['block.num']},#{data['block.tot']},#{data['line.num']},#{data['line.tot']}" if data.length > 0
 
-  OVERALL STATS SUMMARY
-
-   total packages:         2
-   total executable files: 8
-   total classes:          10
-   total methods:          27
-   total executable lines: 99
-
-  COVERAGE BREAKDOWN BY PACKAGE
-
-           name          class, %    method, %     block, %       line, %
-   com.develogical.web  0%   (0/4)  0%   (0/10) 0%   (0/140)   0%   (0/36)
-   com.develogical      50%  (3/6)  47%  (8/17) 66%  (238/359) 52%  (32.9/63)
-
-   [all classes]
-   EMMA 1 (C) Vladimir Roubtsov
-EOF

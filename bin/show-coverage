@@ -1,6 +1,10 @@
 #!/bin/sh
-case x$1 in
+coverage=$1
+[ -f .env ] && . ./.env
+case x$coverage in
   x) echo "Need coverage"; exit -1;;
 esac
-./bin/$1.lastcov -h;
-ls projects/*/.*.$1.rpt | xargs cat
+./bin/$coverage.lastcov -h;
+ls projects/*/.*.$coverage.rpt | while read f; do
+  [ -s $f ] && cat $f || true;
+done

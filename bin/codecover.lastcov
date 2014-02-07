@@ -41,7 +41,7 @@ h = {}
   end
 end
 
-puts "#{project},#{[h[:ln],h[:lt],h[:bn],h[:bt],h[:pn],h[:pt],h[:cn],h[:ct]].inspect.gsub(/[\[\] ]/,'')}"
+puts "#{project},#{[h[:ln],h[:lt],h[:bn],h[:bt],h[:pn],h[:pt],h[:cn],h[:ct]].inspect.gsub(/[\[\] ]/,'')}" if h.length > 0
 
 
 s=<<EOF
