@@ -4,7 +4,7 @@ require 'rubygems'
 require 'nokogiri'
 
 case ARGV[0]
-when /-h/
+when /^-h$/
     puts " pit.line.num,pit.line.total,pit.mutation.num,pit.mutation.total";
     exit 0
 end

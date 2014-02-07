@@ -4,7 +4,7 @@ require 'rubygems'
 require 'nokogiri'
 
 case ARGV[0]
-when /-h/
+when /^-h$/
     puts " emma.class.num,emma.class.total,emma.method.num,emma.method.total,emma.block.num,emma.block.total,emma.line.num,emma.line.total"
     exit 0
 end

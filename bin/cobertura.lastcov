@@ -4,7 +4,7 @@ require 'rubygems'
 require 'nokogiri'
 
 case ARGV[0]
-when /-h/
+when /^-h$/
   puts " cobertura.line.num,cobertura.line.total,cobertura.branch.num,cobertura.branch.total,cobertura.complexity"
   exit 0
 end
