@@ -39,7 +39,6 @@ def get_dependencies(doc)
 end
 
 reqdeps = [
-  ['net.sourceforge.javydreamercsw', 'randoop', '1.3.2', nil, nil],
   ['xmlutil', 'a', '0.0', "#{Dir.pwd}/../../lib/xmlutil.jar", 'system'],
   ['junit', 'junit', '4.10', nil, 'test'],
 ]
@@ -47,10 +46,6 @@ reqdeps = [
 doc.css('//dependency').each do |node|
   case node.content
   when /junit/i
-    node.remove
-  when /jtestcase/i
-    node.remove
-  when /jcrasher/i
     node.remove
   when /xmlutil/i
     node.remove
