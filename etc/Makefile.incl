@@ -1,5 +1,7 @@
 # Gets included from etc/Makefile.testgen
 
+.NOTPARALLEL: runtests
+
 runtests: ._.$(suite).$(coverage).rpt
 
 $(eval $(call mvn-test-compile,$(suite)))
