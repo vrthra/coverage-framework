@@ -75,7 +75,7 @@ cd ~/covrage-root/coverage-framework
 (cd ../db; ls -1 ) > myprojects.txt
 ```
 
-Run Emma
+Run Emma (or pit, cobertura, codecover, etc. see etc/coverage.txt)
 
 ```
 make tag=myprojects coverage=emma suite=original
