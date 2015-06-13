@@ -1,0 +1,11 @@
+suite=\
+  original \
+  randoop \
+  tpalus \
+  evosuite \
+  testgen4j \
+  testful \
+  jcrasher
+
+# http://ranger.uta.edu/~csallner/dsc/
+# http://code.google.com/p/t2framework/

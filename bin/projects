@@ -5,7 +5,7 @@ if File.exists?("#{tag}.txt")
   projects = "#{tag}.txt"
   bin=File.expand_path(File.dirname(__FILE__))
   root=File.expand_path(File.dirname(File.dirname(__FILE__)))
-  puts %x[#{bin}/cat #{root}/#{projects}]
+  puts %x[#{bin}/xcat #{root}/#{projects}]
 else
   Dir.glob('projects/*').sort.each do |d|
     d.sub!(/^projects\//,'')

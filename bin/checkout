@@ -9,7 +9,13 @@ rm -rf ./projects/$1
 if [ -x ../db/$1.tar ]
 then
   tar -xpf ../db/$1.tar
-else
-  (cd projects; git clone ssh://munin.eecs.oregonstate.edu/scratch/db/github/$1; mkdir -p $1/src/main $1/src/test )
+  exit
 fi
+if [ -d ../db/$1 ]
+then
+  rsync -az ../db/$1/ ./projects/$1/
+  exit
+fi
+
+(cd projects; git clone ssh://munin.eecs.oregonstate.edu/scratch/db/github/$1; mkdir -p $1/src/main $1/src/test )
 

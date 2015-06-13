@@ -1,5 +1,0 @@
-emma
-mockit
-codecover
-cobertura
-pit

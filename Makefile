@@ -6,9 +6,9 @@
 root:=$(CURDIR)
 
 tag=x #$(shell gdate +%F,%R)
-suite=$(shell $(root)/bin/cat $(root)/etc/suite.txt)
+include $(root)/etc/suites.mk
 projects=$(shell $(root)/bin/projects $(tag))
-coverages=$(shell $(root)/bin/cat $(root)/etc/coverage.txt)
+include $(root)/etc/coverage.mk
 coverage=emma #default.
 
 
