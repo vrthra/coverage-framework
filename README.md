@@ -147,3 +147,12 @@ at the same time is not advisable, especially for those that insert probes into 
 
 For the same reason is also advised to 'make clean' before switching between coverage
 techniques, or test suites. But this is not necessary for switching between projects.
+
+## Versions
+
+* Emma: 2.0.5312  maven plugin is 1.0-alpha-3
+* Cobertura: v1.9.4.1 Maven plugin 2.5.2
+* JMockit 1.5
+* Codecover 1.0
+* Pit 0.31
+* Randoop: 1.3.3
